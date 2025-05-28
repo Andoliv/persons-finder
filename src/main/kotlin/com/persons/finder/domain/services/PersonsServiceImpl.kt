@@ -1,7 +1,9 @@
 package com.persons.finder.domain.services
 
+import com.persons.finder.constants.ApiExceptionMessages
 import com.persons.finder.data.Person
 import com.persons.finder.domain.mapper.PersonEntityMapper
+import com.persons.finder.exception.PersonNotFoundException
 import com.persons.finder.repository.PersonRepository
 import org.springframework.stereotype.Service
 
@@ -12,7 +14,10 @@ class PersonsServiceImpl(
 ) : PersonsService {
 
     override fun getById(id: Long): Person {
-        TODO("Not yet implemented")
+        val personEntity = personRepository.findById(id)
+            .orElseThrow { PersonNotFoundException(id) }
+
+        return personEntityMapper.toDto(personEntity)
     }
 
     override fun save(person: Person): Person {

@@ -1,5 +1,6 @@
 package com.persons.finder.presentation
 
+import com.persons.finder.data.Person
 import com.persons.finder.domain.services.PersonsService
 import com.persons.finder.external.ExtPerson
 import com.persons.finder.mapper.PersonMapper
@@ -57,15 +58,21 @@ class PersonController @Autowired constructor(
      */
 
     @GetMapping("")
-    fun getPersons(): ResponseEntity<List<ExtPerson>> {
-        val persons = personsService.getAll()
-        val extPersons = persons.map { personMapper.toDto(it) }
+    fun getPersons(@RequestParam("id", required = false) ids: List<Long>?): ResponseEntity<List<ExtPerson>> {
+        val people: List<Person> = if (ids.isNullOrEmpty()) {
+            personsService.getAll()
+        } else {
+            ids.map { personsService.getById(it) }
+        }
+
+        val extPersons = people.map { personMapper.toDto(it) }
 
         return if (extPersons.isNotEmpty()) {
             ResponseEntity.ok(extPersons)
         } else {
             ResponseEntity.noContent().build()
         }
+
     }
 
 }
