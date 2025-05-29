@@ -7,5 +7,5 @@ import org.mapstruct.Mapper
 @Mapper(componentModel = "spring")
 interface PersonMapper {
     fun toDto(person: Person): ExtPerson
-    fun toEntity(extPerson: ExtPerson): Person
+    fun toData(extPerson: ExtPerson): Person
 }

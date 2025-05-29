@@ -1,8 +1,12 @@
 package com.persons.finder.presentation
 
 import com.persons.finder.data.Person
+import com.persons.finder.domain.services.LocationsService
 import com.persons.finder.domain.services.PersonsService
+import com.persons.finder.external.ExtLocation
+import com.persons.finder.external.ExtNearbyPeople
 import com.persons.finder.external.ExtPerson
+import com.persons.finder.mapper.LocationMapper
 import com.persons.finder.mapper.PersonMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -14,13 +18,26 @@ import javax.validation.Valid
 @RequestMapping("api/v1/persons")
 class PersonController @Autowired constructor(
     private val personsService: PersonsService,
-    private val personMapper: PersonMapper
+    private val personMapper: PersonMapper,
+    private val locationMapper: LocationMapper,
+    private val locationsService: LocationsService
 ) {
 
     /*
         TODO PUT API to update/create someone's location using latitude and longitude
         (JSON) Body
      */
+    @PutMapping("/{id}/location")
+    fun saveLocation(
+        @Valid @RequestBody extLocation: ExtLocation,
+        @PathVariable id: String
+    ): ResponseEntity<ExtLocation> {
+        extLocation.personId = id.toLong()
+        val location = locationMapper.toData(extLocation)
+        val responseLocation = locationsService.addLocation(location)
+
+        return ResponseEntity.ok(locationMapper.toDto(responseLocation))
+    }
 
     /*
         TODO POST API to create a 'person'
@@ -28,17 +45,11 @@ class PersonController @Autowired constructor(
     */
     @PostMapping("")
     fun createPerson(@Valid @RequestBody extPerson: ExtPerson): ResponseEntity<ExtPerson> {
-        try {
+        val person = personMapper.toData(extPerson)
+        val savedPerson = personsService.save(person)
+        val responseExtPerson = personMapper.toDto(savedPerson)
 
-            val person = personMapper.toEntity(extPerson)
-            val savedPerson = personsService.save(person)
-            val responseExtPerson = personMapper.toDto(savedPerson)
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseExtPerson)
-        } catch (e: Exception) {
-            // Handle exception, e.g., log it or return an error response
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseExtPerson)
     }
 
 
@@ -49,6 +60,22 @@ class PersonController @Autowired constructor(
         // John wants to know who is around his location within a radius of 10km
         // API would be called using John's id and a radius 10km
      */
+    @GetMapping("/nearby")
+    fun getNearbyPersons(
+        @RequestParam("latitude") latitude: Double,
+        @RequestParam("longitude") longitude: Double,
+        @RequestParam("radiusKm", defaultValue = "10.0") radiusKm: Double
+    ): ResponseEntity<ExtNearbyPeople> {
+        val locations = locationsService.findAround(latitude, longitude, radiusKm)
+        val personIds = locations.map { it.personId }.distinct()
+        val extNearbyPeople = ExtNearbyPeople(personIds)
+
+        return if (personIds.isNotEmpty()) {
+            ResponseEntity.ok(extNearbyPeople)
+        } else {
+            ResponseEntity.noContent().build()
+        }
+    }
 
     /*
         TODO GET API to retrieve a person or persons name using their ids
@@ -56,13 +83,18 @@ class PersonController @Autowired constructor(
         // John has the list of people around them, now they need to retrieve everybody's names to display in the app
         // API would be called using person or persons ids
      */
-
     @GetMapping("")
     fun getPersons(@RequestParam("id", required = false) ids: List<Long>?): ResponseEntity<List<ExtPerson>> {
         val people: List<Person> = if (ids.isNullOrEmpty()) {
             personsService.getAll()
         } else {
-            ids.map { personsService.getById(it) }
+            ids.mapNotNull {
+                try {
+                    personsService.getById(it)
+                } catch (e: Exception) {
+                    null
+                }
+            }
         }
 
         val extPersons = people.map { personMapper.toDto(it) }

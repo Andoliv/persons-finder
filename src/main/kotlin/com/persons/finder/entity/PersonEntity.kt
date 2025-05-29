@@ -11,6 +11,8 @@ class PersonEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
     var name: String = ""
+
 ) {
     constructor() : this(0, "")
+
 }

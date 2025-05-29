@@ -15,9 +15,11 @@ class PersonsServiceImpl(
 
     override fun getById(id: Long): Person {
         val personEntity = personRepository.findById(id)
-            .orElseThrow { PersonNotFoundException(id) }
+        if (personEntity.isPresent) {
+            return personEntityMapper.toDto(personEntity.get())
+        }
 
-        return personEntityMapper.toDto(personEntity)
+        throw PersonNotFoundException(ApiExceptionMessages.PERSON_NOT_FOUND.format(id))
     }
 
     override fun save(person: Person): Person {
