@@ -3,7 +3,6 @@ package com.persons.finder.domain.services
 import com.persons.finder.data.Location
 import com.persons.finder.domain.mapper.LocationEntityMapper
 import com.persons.finder.domain.mapper.PersonEntityMapper
-import com.persons.finder.mapper.PersonMapper
 import com.persons.finder.repository.LocationRepository
 import org.springframework.stereotype.Service
 
@@ -16,10 +15,8 @@ class LocationsServiceImpl(
 ) : LocationsService {
 
 
-
     override fun addLocation(location: Location): Location {
         val person = personsService.getById(location.personId)
-            ?: throw IllegalArgumentException("Person with id ${location.personId} does not exist.")
 
         val locationEntity = locationEntityMapper.toEntity(location)
         locationEntity.person = personEntityMapper.toEntity(person) // Ensure the person is set in the entity
@@ -43,7 +40,9 @@ class LocationsServiceImpl(
             latitudeMin, latitudeMax, longitudeMin, longitudeMax
         )
 
-        // Haversine formula to calculate the distance between two points on the Earth
+        /**
+         * Haversine formula to calculate the distance between two points on the Earth
+         */
         fun haversine(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
             val R = 6371.0
             val dLat = Math.toRadians(lat2 - lat1)

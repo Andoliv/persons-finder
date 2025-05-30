@@ -2,15 +2,25 @@ package com.persons.finder.domain.mapper
 
 import com.persons.finder.data.Location
 import com.persons.finder.entity.LocationEntity
-import org.mapstruct.Mapper
-import org.mapstruct.Mapping
+import com.persons.finder.entity.PersonEntity
+import org.springframework.stereotype.Component
 
-@Mapper(componentModel = "spring")
-interface LocationEntityMapper {
+@Component
+class LocationEntityMapper {
 
-    @Mapping(source = "person.id", target = "personId")
-    fun toDto(locationEntity: LocationEntity): Location
+    fun toDto(locationEntity: LocationEntity): Location {
+        return Location(
+            personId = locationEntity.person.id,
+            latitude = locationEntity.latitude,
+            longitude = locationEntity.longitude
+        )
+    }
 
-    @Mapping(source = "personId", target = "person.id")
-    fun toEntity(location: Location): LocationEntity
+    fun toEntity(location: Location): LocationEntity {
+        return LocationEntity(
+            person = PersonEntity(location.personId),
+            latitude = location.latitude,
+            longitude = location.longitude
+        )
+    }
 }
