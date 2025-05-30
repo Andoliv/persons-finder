@@ -45,8 +45,8 @@ class PersonRestController @Autowired constructor(
 
     @GetMapping("/nearby")
     override fun getNearbyPersons(
-        @RequestParam("latitude") latitude: Double,
-        @RequestParam("longitude") longitude: Double,
+        @RequestParam("lat") latitude: Double,
+        @RequestParam("lon") longitude: Double,
         @RequestParam("radiusKm", defaultValue = "10.0") radiusKm: Double
     ): ResponseEntity<ExtNearbyPeople> {
         val locations = locationsService.findAround(latitude, longitude, radiusKm)

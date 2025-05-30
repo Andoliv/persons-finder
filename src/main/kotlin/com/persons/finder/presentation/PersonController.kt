@@ -125,14 +125,14 @@ interface PersonController {
         parameters = [
             Parameter(
                 description = PERSONS_GET_NEARBY_LATITUDE,
-                name = "latitude",
+                name = "lat",
                 required = true,
                 example = "100.123",
                 `in` = ParameterIn.QUERY,
             ),
             Parameter(
                 description = PERSONS_GET_NEARBY_LONGITUDE,
-                name = "longitude",
+                name = "lon",
                 required = true,
                 example = "100.123",
                 `in` = ParameterIn.QUERY,

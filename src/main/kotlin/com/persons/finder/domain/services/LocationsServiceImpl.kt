@@ -3,6 +3,7 @@ package com.persons.finder.domain.services
 import com.persons.finder.data.Location
 import com.persons.finder.domain.mapper.LocationEntityMapper
 import com.persons.finder.domain.mapper.PersonEntityMapper
+import com.persons.finder.domain.utils.haversine
 import com.persons.finder.repository.LocationRepository
 import org.springframework.stereotype.Service
 
@@ -39,21 +40,6 @@ class LocationsServiceImpl(
         val locations = locationRepository.findByLatitudeBetweenAndLongitudeBetween(
             latitudeMin, latitudeMax, longitudeMin, longitudeMax
         )
-
-        /**
-         * Haversine formula to calculate the distance between two points on the Earth
-         */
-        fun haversine(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-            val R = 6371.0
-            val dLat = Math.toRadians(lat2 - lat1)
-            val dLon = Math.toRadians(lon2 - lon1)
-            val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                    Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                    Math.sin(dLon / 2) * Math.sin(dLon / 2)
-            val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-
-            return R * c
-        }
 
         val locationsWithDistance = locations.map { location ->
             val distance = haversine(latitude, longitude, location.latitude, location.longitude)
