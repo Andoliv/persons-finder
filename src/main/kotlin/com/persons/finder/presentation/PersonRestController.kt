@@ -3,6 +3,7 @@ package com.persons.finder.presentation
 import com.persons.finder.data.Person
 import com.persons.finder.domain.services.LocationsService
 import com.persons.finder.domain.services.PersonsService
+import com.persons.finder.exception.PersonNotFoundException
 import com.persons.finder.external.*
 import com.persons.finder.mapper.LocationMapper
 import com.persons.finder.mapper.PersonMapper
@@ -64,7 +65,7 @@ class PersonRestController @Autowired constructor(
             ids.mapNotNull {
                 try {
                     personsService.getById(it)
-                } catch (e: Exception) {
+                } catch (e: PersonNotFoundException) {
                     null
                 }
             }

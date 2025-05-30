@@ -1,6 +1,5 @@
 package com.persons.finder.domain.services
 
-import com.persons.finder.constants.ApiExceptionMessages
 import com.persons.finder.data.Person
 import com.persons.finder.domain.mapper.PersonEntityMapper
 import com.persons.finder.exception.PersonNotFoundException
@@ -19,7 +18,7 @@ class PersonsServiceImpl(
             return personEntityMapper.toDto(personEntity.get())
         }
 
-        throw PersonNotFoundException(ApiExceptionMessages.PERSON_NOT_FOUND.format(id))
+        throw PersonNotFoundException(id)
     }
 
     override fun save(person: Person): Person {
