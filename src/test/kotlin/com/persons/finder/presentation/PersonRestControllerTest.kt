@@ -120,6 +120,13 @@ class PersonRestControllerTest {
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(
+                """
+                {
+                    "nearbyIds": [1,2]
+                }
+                """
+            ))
     }
 
     @Test
@@ -136,5 +143,41 @@ class PersonRestControllerTest {
         mockMvc.perform(get("/api/v1/persons/"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(
+                """
+                {
+                    "persons": [
+                        {"id": 1, "name": "A"},
+                        {"id": 2, "name": "B"}
+                    ]
+                }
+                """
+            ))
+    }
+
+    @Test
+    fun getPersonsShouldReturnPersonsByIds() {
+        val person1 = Person(1L, "A")
+        val person2 = Person(2L, "B")
+        val extPerson1 = ExtPerson(1L, "A")
+        val extPerson2 = ExtPerson(2L, "B")
+
+        given(personsService.getById(1L)).willReturn(person1)
+        given(personsService.getById(2L)).willReturn(person2)
+        given(personMapper.toDto(person1)).willReturn(extPerson1)
+        given(personMapper.toDto(person2)).willReturn(extPerson2)
+
+        mockMvc.perform(get("/api/v1/persons/").param("id", "2"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(
+                """
+                {
+                    "persons": [
+                        {"id": 2, "name": "B"}
+                    ]
+                }
+                """
+            ))
     }
 }
